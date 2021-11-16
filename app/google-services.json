@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "430407267738",
+    "project_id": "miage-ebay",
+    "storage_bucket": "miage-ebay.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430407267738:android:6884241d76f9f520ccf623",
+        "android_client_info": {
+          "package_name": "fr.miage.ebay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430407267738-l2lm3tf08ola1kutbpr6jkeshd3ij3s5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fr.miage.ebay",
+            "certificate_hash": "9a01d43dee4a8f6d72835a08c9b976298ffdfd23"
+          }
+        },
+        {
+          "client_id": "430407267738-a8nfehriifraqhrjeirf3mqt81k61pp3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQBO4TV1J6CvfGKeb5Lf6FL7tGOtVF-rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430407267738-a8nfehriifraqhrjeirf3mqt81k61pp3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430407267738:android:ac0461e33d08dfadccf623",
+        "android_client_info": {
+          "package_name": "m2.miage.ebay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430407267738-a8nfehriifraqhrjeirf3mqt81k61pp3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQBO4TV1J6CvfGKeb5Lf6FL7tGOtVF-rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430407267738-a8nfehriifraqhrjeirf3mqt81k61pp3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
