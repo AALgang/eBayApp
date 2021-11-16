@@ -13,13 +13,13 @@
 
     <fragment
         android:id="@+id/navigation_publish"
-        android:name="m2.miage.ebay.ui.publish.DashboardFragment"
+        android:name="m2.miage.ebay.ui.publish.PublishFragment"
         android:label="@string/title_publish"
         tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="m2.miage.ebay.ui.profile.NotificationsFragment"
+        android:name="m2.miage.ebay.ui.profile.ProfileFragment"
         android:label="@string/title_profile"
         tools:layout="@layout/fragment_publish" />
 </navigation>
