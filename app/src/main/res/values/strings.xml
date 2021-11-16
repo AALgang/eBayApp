@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">eBay</string>
+    <string name="deconnexion">Déconnexion</string>
+    <string name="connexion">Connexion</string>
 </resources>
