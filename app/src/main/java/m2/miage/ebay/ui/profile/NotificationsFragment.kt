@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import m2.miage.myapplication.R
+import m2.miage.ebay.R
 
 class NotificationsFragment : Fragment() {
 
