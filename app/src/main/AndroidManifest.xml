@@ -21,7 +21,6 @@
         <activity
             android:name=".StartActivity"
             android:exported="true"
-            android:label="@string/title_activity_start"
             android:theme="@style/Theme.Ebay.NoActionBar">
         </activity>
         <activity
