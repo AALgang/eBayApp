@@ -1,9 +1,13 @@
 package m2.miage.ebay
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -12,6 +16,17 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class FirebaseConnectActivity : AppCompatActivity() {
+
+    companion object {
+        fun signOut(context: Context) {
+            AuthUI.getInstance()
+                .signOut(context)
+                .addOnCompleteListener {
+                    startActivity(context, Intent(context, FirebaseConnectActivity::class.java), null)
+
+                }
+        }
+    }
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
@@ -63,9 +78,8 @@ class FirebaseConnectActivity : AppCompatActivity() {
 
             // Launch acticity
             startActivity(Intent(this, StartActivity::class.java))
-            this.finish();
+            this.finish()
         } else {
-
         }
     }
 
@@ -100,15 +114,6 @@ class FirebaseConnectActivity : AppCompatActivity() {
                     Log.w("Add", "Error adding document", e)
                 }
         }
-    }
-
-    private fun signOut() {
-
-        AuthUI.getInstance()
-            .signOut(this)
-            .addOnCompleteListener {
-                // ...
-            }
     }
 
     private fun delete() {
