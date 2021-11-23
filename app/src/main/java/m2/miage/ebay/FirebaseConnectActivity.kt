@@ -70,14 +70,15 @@ class FirebaseConnectActivity : AppCompatActivity() {
     }
 
     private fun addUser(mail:String, name:String, pseudo:String){
-        var exist = false;
+        var exist = true;
         // Access a Cloud Firestore instance from your Activity
         val db = Firebase.firestore
 
         db.collection("users").whereEqualTo("email", mail)
             .get().addOnSuccessListener { document ->
-                if(document.isEmpty){
-                    exist = true;
+                if(document == null
+                    || document.isEmpty){
+                    exist = false;
                 }
             }
 
