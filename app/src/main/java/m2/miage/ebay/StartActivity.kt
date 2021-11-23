@@ -1,6 +1,11 @@
 package m2.miage.ebay
 
+import android.app.SearchManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.widget.SearchView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -28,5 +33,6 @@ class StartActivity : AppCompatActivity() {
             )
         )
         navView.setupWithNavController(navController)
+
     }
 }
