@@ -14,6 +14,7 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlin.math.log
 
 class FirebaseConnectActivity : AppCompatActivity() {
 
@@ -60,8 +61,8 @@ class FirebaseConnectActivity : AppCompatActivity() {
 
     // [START auth_fui_result]
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
-
         val response = result.idpResponse
+        Log.i("Response onSIgn", result.idpResponse.toString())
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
             val user = FirebaseAuth.getInstance().currentUser
@@ -70,9 +71,8 @@ class FirebaseConnectActivity : AppCompatActivity() {
                 // Name, email address
                 val name = user.displayName
                 val email = user.email
-
                 if (email != null && name != null) {
-                    addUser(name, email, user.uid)
+                    addUser(email, name, user.uid)
                 }
             }
 
@@ -84,36 +84,34 @@ class FirebaseConnectActivity : AppCompatActivity() {
     }
 
     private fun addUser(mail:String, name:String, pseudo:String){
-        var exist = true;
+        var exist: Boolean = false
         // Access a Cloud Firestore instance from your Activity
         val db = Firebase.firestore
+        Log.i("TEST", "addUser : $mail")
+        db.collection("users").whereEqualTo("mail", mail)
+            .get().addOnSuccessListener { documents ->
+                exist = !documents.isEmpty
 
-        db.collection("users").whereEqualTo("email", mail)
-            .get().addOnSuccessListener { document ->
-                if(document == null
-                    || document.isEmpty){
-                    exist = false;
+                if(exist.not()) {
+                    // Create a new user with a first and last name
+                    val user = hashMapOf(
+                        "mail" to mail,
+                        "name" to name,
+                        "pseudo" to pseudo
+                    )
+
+                    // Add a new document with a generated ID
+                    db.collection("users")
+                        .add(user)
+                        .addOnSuccessListener { documentReference ->
+                            Log.d("Add", "DocumentSnapshot added with ID: ${documentReference.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("Add", "Error adding document", e)
+                        }
                 }
             }
 
-        if(!exist) {
-            // Create a new user with a first and last name
-            val user = hashMapOf(
-                "mail" to mail,
-                "name" to name,
-                "pseudo" to pseudo
-            )
-
-            // Add a new document with a generated ID
-            db.collection("users")
-                .add(user)
-                .addOnSuccessListener { documentReference ->
-                    Log.d("Add", "DocumentSnapshot added with ID: ${documentReference.id}")
-                }
-                .addOnFailureListener { e ->
-                    Log.w("Add", "Error adding document", e)
-                }
-        }
     }
 
     private fun delete() {
