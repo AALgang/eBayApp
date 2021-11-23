@@ -33,29 +33,31 @@ class PublishFragment : Fragment() {
         }
 
         bt_valider.setOnClickListener { View ->
-            //Toast.makeText(context, "bouton valider cliqué ", Toast.LENGTH_SHORT).show()
             //Create a new offer with datas
+            
             val Annonce = hashMapOf(
                 "active" to true,
                 "dateDebut" to date.text.toString(),
                 "desc" to tb_description.text.toString(),
-                "nom" to Integer.parseInt(tb_Name.text.toString()),
+                "nom" to tb_Name.text.toString(),
                 "photo" to "https://medias.go-sport.com/media/resized/1300x/catalog/product/01/36/27/93/pouet-pouet_1_v1.jpg",
                 "prixInitial" to tb_prix.text.toString(),
                 "proprietaire" to "utilisateur/5nLqB9JSgBbvOYySt4QMqkh09r93"
             )
 
+            //Toast.makeText(context, Annonce.toString(),Toast.LENGTH_LONG).show()
+            Log.d("TEST", Annonce.toString())
+
             // Add a new document with a generated ID
             db.collection("Offer")
                 .add(Annonce)
                 .addOnSuccessListener { documentReference ->
-                    Toast.makeText(context, "DocumentSnapshot added with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
-                    //Log.d("ADD", "DocumentSnapshot added with ID: ${documentReference.id}")
+                    //Toast.makeText(context, "DocumentSnapshot added with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                    Log.d("TEST", "DocumentSnapshot added with ID: ${documentReference.id}")
                 }
                 .addOnFailureListener { e ->
-
-                    Toast.makeText(context, "Error adding document", Toast.LENGTH_SHORT).show()
-                    //Log.w("BUG", "Error adding document", e)
+                    //Toast.makeText(context, "Error adding document", Toast.LENGTH_SHORT).show()
+                    Log.w("TEST", "Error adding document", e)
                 }
         }
 
