@@ -37,16 +37,13 @@ import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.FileProvider
 
 import android.provider.MediaStore
-
-
-
-
-
+import com.google.firebase.auth.FirebaseAuth
 
 
 class PublishFragment : Fragment() {
 
     val PICK_IMAGE_REQUEST = 234
+    var image_uri = ""
     val db = Firebase.firestore
     //val storage = Firebase.storage
     val storage = Firebase.storage("gs://miage-ebay.appspot.com")
@@ -78,19 +75,21 @@ class PublishFragment : Fragment() {
                 "dateDebut" to date.text.toString(),
                 "desc" to tb_description.text.toString(),
                 "nom" to tb_Name.text.toString(),
-                "photo" to "https://medias.go-sport.com/media/resized/1300x/catalog/product/01/36/27/93/pouet-pouet_1_v1.jpg",
-                "prixInitial" to tb_prix.text.toString(),
-                "proprietaire" to "utilisateur/5nLqB9JSgBbvOYySt4QMqkh09r93"
+                "photo" to image_uri,
+                "prixInitial" to tb_prix.text.toString().toInt(),
+                "proprietaire" to FirebaseAuth.getInstance().currentUser?.uid
             )
+
+            FirebaseAuth.getInstance().currentUser?.uid
 
             //Toast.makeText(context, Annonce.toString(),Toast.LENGTH_LONG).show()
             Log.d("TEST", Annonce.toString())
 
             // Add a new document with a generated ID
-            db.collection("Offer")
+            db.collection("Offers")
                 .add(Annonce)
                 .addOnSuccessListener { documentReference ->
-                    //Toast.makeText(context, "DocumentSnapshot added with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "INSERTION REUSSIE BG", Toast.LENGTH_SHORT).show()
                     Log.d("TEST", "DocumentSnapshot added with ID: ${documentReference.id}")
                 }
                 .addOnFailureListener { e ->
@@ -167,8 +166,10 @@ class PublishFragment : Fragment() {
         storageRef.child(imgageIdInStorage).putFile(selectedImageUri)
             .addOnSuccessListener { taskSnapshot ->
                 val urlTask = taskSnapshot.storage.downloadUrl
+                Log.i("TEST",taskSnapshot.storage.downloadUrl.toString())
                 urlTask.addOnSuccessListener { uri ->
-                    Toast.makeText(context,"POUET ça marche pour l'uri ${uri}",Toast.LENGTH_LONG).show()
+                    Log.i("TEST","POUET ça marche pour l'uri ${uri}")
+                    image_uri = uri.toString()
                 }
             }
             .addOnFailureListener { e ->
@@ -176,7 +177,6 @@ class PublishFragment : Fragment() {
                 Toast.makeText(context,"Raté nullos ",Toast.LENGTH_LONG).show()
                 Log.i("TEST",e.toString())
                 Log.i("TEST",e.message.toString())
-
 
             }
     }
