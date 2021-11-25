@@ -4,5 +4,6 @@
     <string name="title_publish">Publier</string>
     <string name="title_profile">Profil</string>
     <string name="deconnexion">Déconnexion</string>
+    <string name="definirLocalisation">Définir sa localisation de résidence</string>
 
 </resources>
