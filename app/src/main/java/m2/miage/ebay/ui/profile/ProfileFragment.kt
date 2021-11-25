@@ -100,7 +100,7 @@ class ProfileFragment : Fragment() {
                 // Add a new document with a generated ID
                 FirebaseAuth.getInstance().currentUser?.let {
                     if (location != null) {
-                        var coordonnees = location.longitude.toString() + "," + location.longitude.toString()
+                        var coordonnees = location.longitude.toString() + "," + location.latitude.toString()
                         Firebase.firestore.collection("users").document(it.uid)
                             .update("location", coordonnees)
                             .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
