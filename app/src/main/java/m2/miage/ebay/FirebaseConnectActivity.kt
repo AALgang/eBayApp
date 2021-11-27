@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import android.util.Log
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
@@ -15,6 +16,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlin.math.log
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 class FirebaseConnectActivity : AppCompatActivity() {
 
@@ -61,6 +64,7 @@ class FirebaseConnectActivity : AppCompatActivity() {
 
     // [START auth_fui_result]
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+
         val response = result.idpResponse
 
         if (result.resultCode == RESULT_OK) {
@@ -107,7 +111,6 @@ class FirebaseConnectActivity : AppCompatActivity() {
                         .addOnFailureListener { e -> Log.w("FBA", "Error writing document", e) }
                 }
             }
-
     }
 
     private fun delete() {
