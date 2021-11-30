@@ -76,7 +76,7 @@ class PublishFragment : Fragment() {
                 "desc" to tb_description.text.toString(),
                 "nom" to tb_Name.text.toString(),
                 "photo" to image_uri,
-                "prixInitial" to tb_prix.text.toString().toInt(),
+                "prixInitial" to tb_prix.text.toString().toLong(),
                 "proprietaire" to FirebaseAuth.getInstance().currentUser?.uid
             )
 
