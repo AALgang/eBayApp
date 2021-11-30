@@ -55,6 +55,7 @@ class ProfileFragment : Fragment() {
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
+
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -70,7 +71,19 @@ class ProfileFragment : Fragment() {
         btn_localiser.setOnClickListener {
             updateLocation()
         }
+
+        FirebaseAuth.getInstance().currentUser?.uid?.let {
+            Firebase.firestore.collection("users").document(it).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        txb_localisation.text = document.data?.get("location") as String
+                    } else {
+                        txb_localisation.text = "Pas de localisation définie"
+                    }
+                }
+        }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.N)
     private fun updateLocation() {
@@ -111,5 +124,16 @@ class ProfileFragment : Fragment() {
             .addOnFailureListener{
                 Toast.makeText(requireContext(), "Vous devez autoriser l'accés a la position", Toast.LENGTH_LONG)
             }
+
+        FirebaseAuth.getInstance().currentUser?.uid?.let {
+            Firebase.firestore.collection("users").document(it).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        txb_localisation.text = document.data?.get("location") as String
+                    } else {
+                        txb_localisation.text = "Pas de localisation définie"
+                    }
+                }
+        }
     }
 }
