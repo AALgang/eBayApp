@@ -56,20 +56,20 @@ class PublishFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_publish, container, false)
     }
 
+    //TODO : vérifier que la date entrée est bien supèrieure a la date du jour
+    //TODO : faire la page plus bg sinon alexis taper moi
+    //TODO : faire une classe générique pour l'ajout d'image dans la base
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         bt_annuler.setOnClickListener{ View ->
             //Toast.makeText(context, "bouton annuler cliqué ", Toast.LENGTH_SHORT).show()
-            /*tb_prix.setText(0)
-            tb_Name.setText(" ")
-            tb_description.setText(" ")
-            date.setText(" ")*/
+            clearAll()
         }
 
         bt_valider.setOnClickListener { View ->
             //Create a new offer with datas
-
             val Annonce = hashMapOf(
                 "active" to true,
                 "dateDebut" to date.text.toString(),
@@ -80,20 +80,23 @@ class PublishFragment : Fragment() {
                 "proprietaire" to FirebaseAuth.getInstance().currentUser?.uid
             )
 
+            //récup user
             FirebaseAuth.getInstance().currentUser?.uid
 
             //Toast.makeText(context, Annonce.toString(),Toast.LENGTH_LONG).show()
             Log.d("TEST", Annonce.toString())
 
-            // Add a new document with a generated ID
+            //Add a new document with a generated ID
             db.collection("Offers")
                 .add(Annonce)
                 .addOnSuccessListener { documentReference ->
-                    Toast.makeText(context, "INSERTION REUSSIE BG", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "INSERTION EFFECTUEE", Toast.LENGTH_SHORT).show()
                     Log.d("TEST", "DocumentSnapshot added with ID: ${documentReference.id}")
+                    clearAll()
                 }
                 .addOnFailureListener { e ->
                     //Toast.makeText(context, "Error adding document", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "ERREUR D'INSERTION", Toast.LENGTH_SHORT).show()
                     Log.w("TEST", "Error adding document", e)
                 }
         }
@@ -108,17 +111,14 @@ class PublishFragment : Fragment() {
         intent.type = "image/*"
         //startActivityForResult(intent, 1000)
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
 
-        /*val m_intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val file: File = File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg")
-        val uri = FileProvider.getUriForFile(
-            context,
-            context.getPackageName().toString() + ".provider",
-            file
-        )
-        m_intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
-        startActivityForResult(m_intent, PICK_IMAGE_REQUEST)*/
-
+    fun clearAll(){
+        tb_prix.text.clear()
+        tb_Name.text.clear()
+        tb_description.text.clear()
+        date.text.clear()
+        imageView.setImageURI(null)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -129,38 +129,15 @@ class PublishFragment : Fragment() {
             imageView.setImageURI(data?.data)
             //uploadImageToFirebase(data?.data)
             //data?.data?.let { uploadImageToFirebase(it) }
-            pushPicture(data)
+            image_uri = pushPicture(data)
+
 
         }
     }
 
-    private fun uploadImageToFirebase(fileUri: Uri?) {
-
-        // Create a storage reference from our app
+    fun pushPicture(data: Intent?) :String{
         val storageRef = storage.reference
-
-        Log.i("TEST", "file URI "+fileUri.toString())
-
-        var file = Uri.fromFile(File(fileUri.toString()))
-        val imgRef = storageRef.child("${file.lastPathSegment}")
-        var uploadTask = imgRef.putFile(file)
-
-        // Register observers to listen for when the download is done or if it fails
-        uploadTask.addOnFailureListener { e ->
-            // Handle unsuccessful upload
-            Toast.makeText(context,"Raté nullos ",Toast.LENGTH_LONG).show()
-            Log.i("TEST",e.toString())
-            Log.i("TEST",e.message.toString())
-
-
-        }.addOnSuccessListener { taskSnapshot ->
-            // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
-            Toast.makeText(context,"POUET",Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun pushPicture(data: Intent?) {
-        val storageRef = storage.reference
+        var imageUri : String = ""
         val selectedImageUri = data!!.data
         val imgageIdInStorage = selectedImageUri!!.lastPathSegment!! //here you can set whatever Id you need
         storageRef.child(imgageIdInStorage).putFile(selectedImageUri)
@@ -169,7 +146,7 @@ class PublishFragment : Fragment() {
                 Log.i("TEST",taskSnapshot.storage.downloadUrl.toString())
                 urlTask.addOnSuccessListener { uri ->
                     Log.i("TEST","POUET ça marche pour l'uri ${uri}")
-                    image_uri = uri.toString()
+                    imageUri = uri.toString()
                 }
             }
             .addOnFailureListener { e ->
@@ -177,8 +154,9 @@ class PublishFragment : Fragment() {
                 Toast.makeText(context,"Raté nullos ",Toast.LENGTH_LONG).show()
                 Log.i("TEST",e.toString())
                 Log.i("TEST",e.message.toString())
-
             }
+
+        return imageUri
     }
 
 
