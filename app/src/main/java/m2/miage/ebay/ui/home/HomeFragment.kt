@@ -74,7 +74,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         val offers = ArrayList<Offer>()
 
-        //TODO: get data from database
         db.collection("Offers").addSnapshotListener { value, e ->
 
             if (e != null) {

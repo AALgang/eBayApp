@@ -33,19 +33,14 @@ class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<O
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val offer: Offer = offersList.get(position)
-        getUserName(offer.ownerId)
-
-        // Observe le nom récupéré par getUserInfo
-        _userName.observeForever { name ->
-            holder.owner_post.text = name
-        }
 
         holder.name_post.text = offer.name
         holder.price_post.text = context.getString(R.string.txt_devise, offer.price.toString())
-        holder.time_post.text = offer.dateDebut.toString()
+        holder.time_post.text = offer.dateDebut.toString().replace("T", " ")
+        holder.owner_post.text = offer.ownerId
 
         // Affichage des chip en fonction de l'enchère disponible ou non
-        if (isOfferActive(LocalDateTime.parse(holder.time_post.text.toString(), DateTimeFormatter.ISO_DATE_TIME))) {
+        if (isOfferActive(LocalDateTime.parse(offer.dateDebut.toString(), DateTimeFormatter.ISO_DATE_TIME))) {
             holder.chip_active.setChipBackgroundColorResource(R.color.teal_200)
             holder.chip_active.text = context.getString(R.string.chip_available)
         } else {
@@ -81,18 +76,6 @@ class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<O
         }
 
         return response
-    }
-
-    /**
-     * Récupère le nom de l'utilisateur correspondant
-     * @param userId -> identifiant de l'utilisateur
-     */
-    private fun getUserName(userId : String) {
-
-        db.collection("users").document(userId).get().addOnSuccessListener { document ->
-
-            _userName.value = document.data?.get("name").toString()
-        }
     }
 
     override fun getItemCount(): Int {
