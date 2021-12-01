@@ -1,7 +1,9 @@
 package m2.miage.ebay.ui.profile
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
@@ -26,10 +28,18 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.fragment_publish.*
 
 
 class ProfileFragment : Fragment() {
+
+    val PICK_IMAGE_REQUEST = 234
+    var image_uri = ""
+    val db = Firebase.firestore
+    //val storage = Firebase.storage
+    val storage = Firebase.storage("gs://miage-ebay.appspot.com")
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -67,7 +77,7 @@ class ProfileFragment : Fragment() {
                 .addOnSuccessListener { document ->
                     if (document != null) {
                         txb_localisation.text = document.data?.get("location") as String
-                        if(document.data?.get("avatar_uri") != null) {
+                        if(document.data?.get("avatar_uri") != null && (document.data?.get("avatar_uri") as String).isNotEmpty()) {
                             Picasso.get().load(document.data!!["avatar_uri"] as String)
                                 .fit()
                                 .placeholder(R.drawable.ic_person)
@@ -83,6 +93,18 @@ class ProfileFragment : Fragment() {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE_REQUEST) {
+            // I'M GETTING THE URI OF THE IMAGE AS DATA AND SETTING IT TO THE IMAGEVIEW
+            Log.i("TEST",data?.data.toString())
+            //uploadImageToFirebase(data?.data)
+            //data?.data?.let { uploadImageToFirebase(it) }
+            pushPicture(data)
+
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -94,6 +116,29 @@ class ProfileFragment : Fragment() {
 
         btn_localiser.setOnClickListener {
             updateLocation()
+        }
+
+        avatar.setOnClickListener {
+            openGalleryForImage()
+
+            // Add a new document with a generated ID
+            FirebaseAuth.getInstance().currentUser?.let {
+                Firebase.firestore.collection("users").document(it.uid)
+                    .update("avatar_uri", image_uri)
+                    .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                    .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
+            }
+        }
+        btn_change_avatar.setOnClickListener{
+            openGalleryForImage()
+
+            // Add a new document with a generated ID
+            FirebaseAuth.getInstance().currentUser?.let {
+                Firebase.firestore.collection("users").document(it.uid)
+                    .update("avatar_uri", image_uri)
+                    .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                    .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
+            }
         }
     }
 
@@ -139,5 +184,47 @@ class ProfileFragment : Fragment() {
             }
 
         reload()
+    }
+
+    private fun openGalleryForImage() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        //startActivityForResult(intent, 1000)
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    fun pushPicture(data: Intent?) {
+        val storageRef = storage.reference
+        val selectedImageUri = data!!.data
+        val imgageIdInStorage = selectedImageUri!!.lastPathSegment!! //here you can set whatever Id you need
+        storageRef.child(imgageIdInStorage).putFile(selectedImageUri)
+            .addOnSuccessListener { taskSnapshot ->
+                val urlTask = taskSnapshot.storage.downloadUrl
+                Log.i("TEST", taskSnapshot.storage.downloadUrl.toString())
+                urlTask.addOnSuccessListener { uri ->
+                    Log.i("TEST", "POUET ça marche pour l'uri ${uri}")
+                    image_uri = uri.toString()
+                    // Add a new document with a generated ID
+                    FirebaseAuth.getInstance().currentUser?.let {
+                        Firebase.firestore.collection("users").document(it.uid)
+                            .update("avatar_uri", image_uri)
+                            .addOnSuccessListener {
+                                Log.d(
+                                    "FB",
+                                    "DocumentSnapshot successfully updated!"
+                                )
+                                reload()
+                            }
+                            .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
+                    }
+                }
+                    .addOnFailureListener { e ->
+                        // Handle unsuccessful upload
+                        Toast.makeText(context, "Raté nullos ", Toast.LENGTH_LONG).show()
+                        Log.i("TEST", e.toString())
+                        Log.i("TEST", e.message.toString())
+
+                    }
+            }
     }
 }
