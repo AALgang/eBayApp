@@ -1,8 +1,6 @@
 package m2.miage.ebay.ui.home
 
 import android.content.Context
-import android.content.Intent
-import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,32 +8,49 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getColorStateList
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.offer_item_activity.view.*
 import m2.miage.ebay.R
 import m2.miage.ebay.data.Offer
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<OfferRecyclerViewAdapter.ViewHolder>() {
 
-    var offersList = listOffers
     lateinit var context: Context
+
+    var offersList = listOffers
+    var _userName : MutableLiveData<String> = MutableLiveData()
+
+    val db = Firebase.firestore
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val offer: Offer = offersList.get(position)
+        getUserName(offer.ownerId)
+
+        // Observe le nom récupéré par getUserInfo
+        _userName.observeForever { name ->
+            holder.owner_post.text = name
+        }
 
         holder.name_post.text = offer.name
-        holder.price_post.text = offer.price.toString() + " €"
-        holder.owner_post.text = offer.ownerId
-        if (offer.active == true) {
+        holder.price_post.text = context.getString(R.string.txt_devise, offer.price.toString())
+        holder.time_post.text = offer.dateDebut.toString()
+
+        // Affichage des chip en fonction de l'enchère disponible ou non
+        if (isOfferActive(LocalDateTime.parse(holder.time_post.text.toString(), DateTimeFormatter.ISO_DATE_TIME))) {
             holder.chip_active.setChipBackgroundColorResource(R.color.teal_200)
-            holder.chip_active.text = "dispo"
-            holder.time_post.text = "en cours"
+            holder.chip_active.text = context.getString(R.string.chip_available)
         } else {
             holder.chip_active.setChipBackgroundColorResource(R.color.red)
-            holder.chip_active.text = "non dispo"
-            holder.time_post.text = offer.startDate?.time.toString()
+            holder.chip_active.text = context.getString(R.string.chip_not_available)
         }
 
         Glide.with(context).load(offer.image).into(holder.image_post)
@@ -44,17 +59,44 @@ class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<O
             override fun onClick(v: View?) {
                 val context = v?.context as AppCompatActivity
 
-                Toast.makeText(context, "Clic", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, v.txt_time.toString(), Toast.LENGTH_SHORT).show()
+
             }
         })
     }
 
-    override fun getItemCount(): Int {
-        return offersList.size
+    /**
+     * Vérifie si l'enchère actuelle est disponible ou non
+     * @param date : Date de début de l'enchère
+     */
+    private fun isOfferActive(date: LocalDateTime) : Boolean {
+
+        var response = false
+        val now = LocalDateTime.now()
+
+        // Vérifie si l'enchère est démarrée et si les 5 min sont écoulées
+        if (date.toEpochSecond(ZoneOffset.UTC) <= now.toEpochSecond(ZoneOffset.UTC)
+            && now.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC) + 300) {
+            response = true
+        }
+
+        return response
     }
 
-    fun addOffer(arrList: List<Offer>) {
-        this.offersList = arrList
+    /**
+     * Récupère le nom de l'utilisateur correspondant
+     * @param userId -> identifiant de l'utilisateur
+     */
+    private fun getUserName(userId : String) {
+
+        db.collection("users").document(userId).get().addOnSuccessListener { document ->
+
+            _userName.value = document.data?.get("name").toString()
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return offersList.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -1,7 +1,8 @@
 package m2.miage.ebay.ui.home
 
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_home.*
 import m2.miage.ebay.R
@@ -21,7 +23,7 @@ import java.util.*
 import com.google.firebase.firestore.ktx.firestore
 import kotlin.collections.ArrayList
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var _posts : MutableLiveData<Resource<List<Offer>>> = MutableLiveData()
     lateinit var offerAdapter: OfferRecyclerViewAdapter
@@ -32,6 +34,12 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        v_swipe.setOnRefreshListener(this)
     }
 
     override fun onResume() {
@@ -67,7 +75,7 @@ class HomeFragment : Fragment() {
         val offers = ArrayList<Offer>()
 
         //TODO: get data from database
-        db.collection("Offer").addSnapshotListener { value, e ->
+        db.collection("Offers").addSnapshotListener { value, e ->
 
             if (e != null) {
                 return@addSnapshotListener
@@ -78,7 +86,7 @@ class HomeFragment : Fragment() {
                         offers.add(Offer(doc.getString("nom").toString(),
                             doc.getString("desc").toString(),
                             doc.getDouble("prixInitial"),
-                            doc.getDate("date"),
+                            doc.getString("dateDebut"),
                             doc.getString("photo"),
                             doc.getBoolean("active"),
                             doc.getString("proprietaire").toString()))
@@ -102,5 +110,15 @@ class HomeFragment : Fragment() {
         recyclerView.adapter = offerAdapter
 
         offerAdapter.context = this.requireContext()
+    }
+
+    override fun onRefresh() {
+
+        Handler(Looper.getMainLooper()).run {
+            getPosts()
+            initObserver()
+
+            v_swipe.isRefreshing = false
+        }
     }
 }

@@ -1,12 +1,12 @@
 package m2.miage.ebay.data
 
-import java.util.*
+import java.time.LocalDateTime
 
 data class Offer(
     val name: String,
     val description: String?,
     val price: Double?,
-    val startDate: Date?,
+    val dateDebut: String?,
     val image: String?,
     val active: Boolean?,
     val ownerId: String)
