@@ -14,6 +14,7 @@ import m2.miage.ebay.FirebaseConnectActivity
 import m2.miage.ebay.R
 import android.location.LocationListener
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -25,6 +26,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.squareup.picasso.Picasso
 
 
 class ProfileFragment : Fragment() {
@@ -51,12 +53,34 @@ class ProfileFragment : Fragment() {
             }
             }
         }
-
+        reload()
         locationPermissionRequest.launch(arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION))
 
         return inflater.inflate(R.layout.fragment_profile, container, false)
+    }
+
+    fun reload(){
+        FirebaseAuth.getInstance().currentUser?.uid?.let {
+            Firebase.firestore.collection("users").document(it).get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        txb_localisation.text = document.data?.get("location") as String
+                        if(document.data?.get("avatar_uri") != null) {
+                            Picasso.get().load(document.data!!["avatar_uri"] as String)
+                                .fit()
+                                .placeholder(R.drawable.ic_person)
+                                .error(R.drawable.my_great_logo)
+                                .into(avatar)
+                        } else {
+                            avatar.setImageResource(R.drawable.my_great_logo)
+                        }
+                    } else {
+                        txb_localisation.text = "Pas de localisation définie"
+                    }
+                }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -70,17 +94,6 @@ class ProfileFragment : Fragment() {
 
         btn_localiser.setOnClickListener {
             updateLocation()
-        }
-
-        FirebaseAuth.getInstance().currentUser?.uid?.let {
-            Firebase.firestore.collection("users").document(it).get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        txb_localisation.text = document.data?.get("location") as String
-                    } else {
-                        txb_localisation.text = "Pas de localisation définie"
-                    }
-                }
         }
     }
 
@@ -125,15 +138,6 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(requireContext(), "Vous devez autoriser l'accés a la position", Toast.LENGTH_LONG)
             }
 
-        FirebaseAuth.getInstance().currentUser?.uid?.let {
-            Firebase.firestore.collection("users").document(it).get()
-                .addOnSuccessListener { document ->
-                    if (document != null) {
-                        txb_localisation.text = document.data?.get("location") as String
-                    } else {
-                        txb_localisation.text = "Pas de localisation définie"
-                    }
-                }
-        }
+        reload()
     }
 }

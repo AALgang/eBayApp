@@ -23,9 +23,9 @@
             android:layout_gravity="center">
 
             <ImageView
+                android:id="@+id/avatar"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:src="@drawable/my_great_logo"
                 android:scaleType="centerCrop"/>
 
         </androidx.cardview.widget.CardView>
