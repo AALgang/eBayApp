@@ -6,5 +6,6 @@
     <string name="deconnexion">Déconnexion</string>
     <string name="definirLocalisation">Définir sa localisation de résidence</string>
     <string name="changer_l_avatar">Changer l\'avatar</string>
+    <string name="modifier_le_pseudo">Modifier le pseudo</string>
 
 </resources>

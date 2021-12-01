@@ -2,7 +2,9 @@ package m2.miage.ebay.ui.profile
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -18,7 +20,9 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
+import android.text.InputType
 import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -79,7 +83,6 @@ class ProfileFragment : Fragment() {
                         txb_localisation.text = document.data?.get("location") as String
                         if(document.data?.get("avatar_uri") != null && (document.data?.get("avatar_uri") as String).isNotEmpty()) {
                             Picasso.get().load(document.data!!["avatar_uri"] as String)
-                                .fit()
                                 .placeholder(R.drawable.ic_person)
                                 .error(R.drawable.my_great_logo)
                                 .into(avatar)
@@ -139,6 +142,52 @@ class ProfileFragment : Fragment() {
                     .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
                     .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
             }
+        }
+
+        btn_updatePseudo.setOnClickListener {
+
+            val builder: AlertDialog.Builder = android.app.AlertDialog.Builder(context)
+            builder.setTitle("Nouveau pseudo")
+
+// Set up the input
+            val input = EditText(context)
+// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            input.setHint("Entrez un nouveau pseudonyme unique")
+            input.inputType = InputType.TYPE_CLASS_TEXT
+            builder.setView(input)
+
+// Set up the buttons
+            builder.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                Firebase.firestore.collection("users").whereEqualTo("pseudo", input.text.toString()).get().addOnSuccessListener{ doc ->
+                    if(doc.documents.size <= 0) {
+                        // Add a new document with a generated ID
+                        FirebaseAuth.getInstance().currentUser?.let {
+                            Firebase.firestore.collection("users").document(it.uid)
+                                .update("pseudo", input.text.toString())
+                                .addOnSuccessListener {
+                                    Log.d(
+                                        "FB",
+                                        "DocumentSnapshot successfully updated!"
+                                    )
+                                    Toast.makeText(context, "Pseudo mis à jour", Toast.LENGTH_LONG).show()
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(
+                                        "FB",
+                                        "Error updating document",
+                                        e
+                                    )
+                                }
+                        }
+                    } else {
+                        Toast.makeText(context, "Pseudo déja utilisé", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+            })
+            builder.setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which -> dialog.cancel() })
+
+            builder.show()
         }
     }
 
