@@ -82,7 +82,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
              value?.let {
                     for (doc in value) {
 
-                        offers.add(Offer(doc.getString("nom").toString(),
+                        offers.add(Offer(doc.id,
+                            doc.getString("nom").toString(),
                             doc.getString("desc").toString(),
                             doc.getDouble("prixInitial"),
                             doc.getString("dateDebut"),

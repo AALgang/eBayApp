@@ -1,13 +1,15 @@
 package m2.miage.ebay.ui.home
 
 import android.content.Context
+import android.content.Intent
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -17,19 +19,17 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.offer_item_activity.view.*
 import m2.miage.ebay.R
 import m2.miage.ebay.data.Offer
+import m2.miage.ebay.ui.post.PostActivity
+import m2.miage.ebay.util.DateUtil.Companion.isOfferActive
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<OfferRecyclerViewAdapter.ViewHolder>() {
 
     lateinit var context: Context
 
     var offersList = listOffers
-    var _userName : MutableLiveData<String> = MutableLiveData()
-
-    val db = Firebase.firestore
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val offer: Offer = offersList.get(position)
@@ -54,28 +54,15 @@ class OfferRecyclerViewAdapter(listOffers: List<Offer>) : RecyclerView.Adapter<O
             override fun onClick(v: View?) {
                 val context = v?.context as AppCompatActivity
 
-                Toast.makeText(context, v.txt_time.toString(), Toast.LENGTH_SHORT).show()
+                val intent = Intent(context, PostActivity::class.java)
+                intent.putExtra("Offer", Offer(id = offer.id, name = offer.name,
+                    description = offer.description, price = offer.price,
+                    dateDebut = offer.dateDebut, image = offer.image,
+                    active = offer.active, ownerId = offer.ownerId))
 
+                ContextCompat.startActivity(context, intent, null)
             }
         })
-    }
-
-    /**
-     * Vérifie si l'enchère actuelle est disponible ou non
-     * @param date : Date de début de l'enchère
-     */
-    private fun isOfferActive(date: LocalDateTime) : Boolean {
-
-        var response = false
-        val now = LocalDateTime.now()
-
-        // Vérifie si l'enchère est démarrée et si les 5 min sont écoulées
-        if (date.toEpochSecond(ZoneOffset.UTC) <= now.toEpochSecond(ZoneOffset.UTC)
-            && now.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC) + 300) {
-            response = true
-        }
-
-        return response
     }
 
     override fun getItemCount(): Int {
