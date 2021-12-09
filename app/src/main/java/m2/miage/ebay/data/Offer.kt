@@ -1,7 +1,9 @@
 package m2.miage.ebay.data
 
 import android.os.Parcelable
+import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 
 @Parcelize
 data class Offer (
@@ -12,12 +14,5 @@ data class Offer (
     val dateDebut: String?,
     val image: String?,
     val active: Boolean?,
-    val ownerId: String): Parcelable
-
-@Parcelize
-data class User(
-    val username: String,
-    val name: String,
-    val email: String,
-    val identifier: String
-): Parcelable
+    val ownerId: String?,
+    val bid: Bid?): Parcelable

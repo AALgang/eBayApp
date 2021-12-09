@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_home.*
 import m2.miage.ebay.R
@@ -21,12 +23,15 @@ import m2.miage.ebay.util.Resource
 import m2.miage.ebay.util.Status
 import java.util.*
 import com.google.firebase.firestore.ktx.firestore
+import m2.miage.ebay.data.Bid
+import m2.miage.ebay.data.User
 import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var _posts : MutableLiveData<Resource<List<Offer>>> = MutableLiveData()
     lateinit var offerAdapter: OfferRecyclerViewAdapter
+    var offersBid: MutableLiveData<Bid> = MutableLiveData()
     val db = Firebase.firestore
 
     override fun onCreateView(
@@ -42,71 +47,78 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         v_swipe.setOnRefreshListener(this)
     }
 
-    override fun onResume() {
-        super.onResume()
-        getPosts()
-        initObserver()
-    }
-
     private fun initObserver() {
 
-        _posts.observe(viewLifecycleOwner, { offers ->
 
-            when(offers.status) {
-
-                Status.SUCCESS -> {
-                    offers.data?.let {
-                        initAdapter(rv_post, it)
-                    }
-
-                }
-                Status.ERROR -> {
-                    Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
-                }
-                Status.LOADING -> {
-                    Toast.makeText(context, "Loading", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
     }
 
     private fun getPosts() {
 
-        val offers = ArrayList<Offer>()
+        val offerList = ArrayList<Offer>()
 
-        db.collection("Offers").addSnapshotListener { value, e ->
+        db.collection("Offers")
+            .addSnapshotListener { offers, e ->
 
             if (e != null) {
                 return@addSnapshotListener
             }
-             value?.let {
-                    for (doc in value) {
 
-                        offers.add(Offer(doc.id,
-                            doc.getString("nom").toString(),
-                            doc.getString("desc").toString(),
-                            doc.getDouble("prixInitial"),
-                            doc.getString("dateDebut"),
-                            doc.getString("photo"),
-                            doc.getBoolean("active"),
-                            doc.getString("proprietaire").toString()))
+                offers?.let {
+                    for (offer in offers) {
 
+                        getBid(offer.reference.id)
+
+                        offersBid.observe(viewLifecycleOwner, {
+
+                            offerList.add(Offer(
+                                id = offer.id,
+                                name = offer.getString("nom").toString(),
+                                description = offer.getString("desc"),
+                                price = offer.getDouble("prixInitial"),
+                                dateDebut = offer.getString("dateDebut"),
+                                image = offer.getString("photo"),
+                                active = offer.getBoolean("active"),
+                                ownerId = offer.getString("proprietaire"),
+                                bid = it
+                            ))
+                        })
                     }
 
-                 _posts.value = Resource.success(offers)
-
+                    _posts.value = Resource.success(offerList)
              }
+        }
+    }
+
+    private fun getBid(docRef: String) {
+        db.collection("Offers")
+            .document(docRef)
+            .collection("bid")
+            .orderBy("prix", Query.Direction.ASCENDING).limit(1)
+            .get()
+            .addOnSuccessListener{ bids ->
+
+                bids?.let {
+
+                    for (bid in bids) {
+
+                        offersBid.value = Bid(
+                            bid.getString("acheteur").toString(),
+                            bid.getDate("date"),
+                            bid.getDouble("prix")
+                        )
+                    }
+                }
         }
     }
 
     private fun initAdapter(recyclerView: RecyclerView, list: List<Offer>) {
 
-        val listOffer = list
+        val listBid = list
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         recyclerView.itemAnimator = DefaultItemAnimator()
 
-        offerAdapter = OfferRecyclerViewAdapter(listOffer)
+        offerAdapter = OfferRecyclerViewAdapter(listBid)
         recyclerView.adapter = offerAdapter
 
         offerAdapter.context = this.requireContext()
@@ -116,7 +128,22 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         Handler(Looper.getMainLooper()).run {
             getPosts()
-            initObserver()
+
+            _posts.observe(viewLifecycleOwner, { offers ->
+
+                when(offers.status) {
+
+                    Status.SUCCESS -> {
+
+                        Toast.makeText(context, offers.data?.size.toString(), Toast.LENGTH_SHORT).show()
+
+                        offers.data?.let {
+                            initAdapter(rv_post, it)
+                        }
+
+                    }
+                }
+            })
 
             v_swipe.isRefreshing = false
         }
