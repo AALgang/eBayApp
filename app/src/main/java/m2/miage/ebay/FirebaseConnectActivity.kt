@@ -105,7 +105,6 @@ class FirebaseConnectActivity : AppCompatActivity() {
                         .addOnFailureListener { e -> Log.w("FBA", "Error writing document", e) }
                 }
             }
-
     }
 
     private fun delete() {
