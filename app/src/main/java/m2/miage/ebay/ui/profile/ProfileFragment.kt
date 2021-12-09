@@ -80,7 +80,7 @@ class ProfileFragment : Fragment() {
             Firebase.firestore.collection("users").document(it).get()
                 .addOnSuccessListener { document ->
                     if (document != null) {
-                        txb_localisation.text = document.data?.get("location") as String
+                        txb_localisation.text = document.data?.get("location").toString()
                         if(document.data?.get("avatar_uri") != null && (document.data?.get("avatar_uri") as String).isNotEmpty()) {
                             Picasso.get().load(document.data!!["avatar_uri"] as String)
                                 .placeholder(R.drawable.ic_person)
