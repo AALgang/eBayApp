@@ -1,8 +1,10 @@
 package m2.miage.ebay.ui.home
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +33,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var _posts : MutableLiveData<Resource<List<Offer>>> = MutableLiveData()
     lateinit var offerAdapter: OfferRecyclerViewAdapter
+
     var offersBid: MutableLiveData<Bid> = MutableLiveData()
     val db = Firebase.firestore
 
@@ -41,15 +44,46 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        initializeObservers()
 
         v_swipe.setOnRefreshListener(this)
     }
 
-    private fun initObserver() {
+    private fun initializeAdapter(offers: List<Offer>) {
+        offerAdapter = OfferRecyclerViewAdapter(offers)
+        rv_post.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        rv_post.itemAnimator = DefaultItemAnimator()
+        offerAdapter.context = this.requireContext()
+        rv_post.adapter = offerAdapter
+    }
 
+    private fun initializeObservers() {
 
+        val list = mutableListOf<Offer>()
+
+        initializeAdapter(list)
+
+        getPosts()
+        _posts.observe(viewLifecycleOwner, {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    list.addAll(it.data!!)
+                    initializeAdapter(it.data)
+                }
+                Status.LOADING -> {
+                    Toast.makeText(context, "Chargement", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        initializeObservers()
     }
 
     private fun getPosts() {
@@ -84,7 +118,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         })
                     }
 
-                    _posts.value = Resource.success(offerList)
+                    _posts.postValue(Resource.success(offerList))
              }
         }
     }
@@ -101,50 +135,21 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                     for (bid in bids) {
 
-                        offersBid.value = Bid(
+                        offersBid.postValue(Bid(
                             bid.getString("acheteur").toString(),
                             bid.getDate("date"),
                             bid.getDouble("prix")
-                        )
+                        ))
                     }
                 }
         }
     }
 
-    private fun initAdapter(recyclerView: RecyclerView, list: List<Offer>) {
-
-        val listBid = list
-        recyclerView.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        recyclerView.itemAnimator = DefaultItemAnimator()
-
-        offerAdapter = OfferRecyclerViewAdapter(listBid)
-        recyclerView.adapter = offerAdapter
-
-        offerAdapter.context = this.requireContext()
-    }
-
     override fun onRefresh() {
 
+        initializeObservers()
+
         Handler(Looper.getMainLooper()).run {
-            getPosts()
-
-            _posts.observe(viewLifecycleOwner, { offers ->
-
-                when(offers.status) {
-
-                    Status.SUCCESS -> {
-
-                        Toast.makeText(context, offers.data?.size.toString(), Toast.LENGTH_SHORT).show()
-
-                        offers.data?.let {
-                            initAdapter(rv_post, it)
-                        }
-
-                    }
-                }
-            })
-
             v_swipe.isRefreshing = false
         }
     }

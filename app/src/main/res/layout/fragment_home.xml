@@ -12,16 +12,6 @@
     android:layout_height="match_parent"
     tools:context="m2.miage.ebay.ui.home.HomeFragment">
 
-    <SearchView
-        android:id="@+id/v_search"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:queryHint="@string/title_searchbar"
-        android:iconifiedByDefault="false"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_post"
         android:layout_width="0dp"
@@ -30,7 +20,7 @@
         android:layout_marginEnd="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/v_search"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
