@@ -10,9 +10,9 @@ data class Offer (
     val id: String,
     val name: String,
     val description: String?,
-    val price: Double?,
+    val price: String?,
     val dateDebut: String?,
     val image: String?,
     val active: Boolean?,
-    val ownerId: String?,
-    val bid: Bid?): Parcelable
+    val ownerId: String?
+): Parcelable

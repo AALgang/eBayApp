@@ -10,5 +10,5 @@ import java.util.*
 data class Bid(
     val acheteur: String,
     val date: Date?,
-    val prix: Double?
+    val prix: String?
 ) : Parcelable

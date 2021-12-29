@@ -44,11 +44,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initializeObservers()
-
         v_swipe.setOnRefreshListener(this)
     }
 
@@ -100,50 +98,22 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 offers?.let {
                     for (offer in offers) {
 
-                        getBid(offer.reference.id)
-
-                        offersBid.observe(viewLifecycleOwner, {
-
                             offerList.add(Offer(
                                 id = offer.id,
                                 name = offer.getString("nom").toString(),
                                 description = offer.getString("desc"),
-                                price = offer.getDouble("prixInitial"),
+                                price = offer.getString("prixInitial"),
                                 dateDebut = offer.getString("dateDebut"),
                                 image = offer.getString("photo"),
                                 active = offer.getBoolean("active"),
                                 ownerId = offer.getString("proprietaire"),
-                                bid = it
                             ))
-                        })
+                        }
                     }
 
                     _posts.postValue(Resource.success(offerList))
              }
         }
-    }
-
-    private fun getBid(docRef: String) {
-        db.collection("Offers")
-            .document(docRef)
-            .collection("bid")
-            .orderBy("prix", Query.Direction.ASCENDING).limit(1)
-            .get()
-            .addOnSuccessListener{ bids ->
-
-                bids?.let {
-
-                    for (bid in bids) {
-
-                        offersBid.postValue(Bid(
-                            bid.getString("acheteur").toString(),
-                            bid.getDate("date"),
-                            bid.getDouble("prix")
-                        ))
-                    }
-                }
-        }
-    }
 
     override fun onRefresh() {
 

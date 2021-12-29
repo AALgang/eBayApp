@@ -41,12 +41,7 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
             holder.name_post.text = offer.name
             holder.price_post.text = context.getString(R.string.txt_devise, offer.price.toString())
             holder.time_post.text = offer.dateDebut.toString().replace("T", " ")
-
-            getUser(offer.bid?.acheteur.toString())
-
-            userReference.observeForever { user->
-                holder.owner_post.text = user.name
-            }
+            holder.owner_post.text = offer.ownerId
 
             // Affichage des chip en fonction de l'enchère disponible ou non
             if (isOfferActive(LocalDateTime.parse(offer.dateDebut.toString(), DateTimeFormatter.ISO_DATE_TIME))) {
@@ -64,10 +59,10 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
                     val context = v?.context as AppCompatActivity
 
                     val intent = Intent(context, PostActivity::class.java)
-                    /*intent.putExtra("Offer", Offer(id = offer.id, name = offer.name,
+                    intent.putExtra("Offer", Offer(id = offer.id, name = offer.name,
                         description = offer.description, price = offer.price,
                         dateDebut = offer.dateDebut, image = offer.image,
-                        active = offer.active, ownerId = offer.ownerId))*/
+                        active = offer.active, ownerId = offer.ownerId))
 
                     ContextCompat.startActivity(context, intent, null)
                 }
