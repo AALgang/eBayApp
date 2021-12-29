@@ -8,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -58,13 +60,27 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
                 override fun onClick(v: View?) {
                     val context = v?.context as AppCompatActivity
 
-                    val intent = Intent(context, PostActivity::class.java)
-                    intent.putExtra("Offer", Offer(id = offer.id, name = offer.name,
-                        description = offer.description, price = offer.price,
-                        dateDebut = offer.dateDebut, image = offer.image,
-                        active = offer.active, ownerId = offer.ownerId))
+                    FirebaseAuth.getInstance().currentUser?.let {
+                        var bid = Firebase.firestore.collection("Offers").document(offer.id)
+                            .collection("bid").orderBy("date").get().addOnSuccessListener {
 
-                    ContextCompat.startActivity(context, intent, null)
+                                Toast.makeText(context, it.documents.get(0).toString(), Toast.LENGTH_SHORT).show()
+
+                                val intent = Intent(context, PostActivity::class.java)
+                                intent.putExtra(
+                                    "Offer", Offer(
+                                        id = offer.id, name = offer.name,
+                                        description = offer.description, price = offer.price,
+                                        dateDebut = offer.dateDebut, image = offer.image,
+                                        active = offer.active, ownerId = offer.ownerId
+                                    )
+                                )
+
+                                ContextCompat.startActivity(context, intent, null)
+
+                            }
+
+                    }
                 }
             })
 
