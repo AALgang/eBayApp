@@ -72,7 +72,8 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
                                         id = offer.id, name = offer.name,
                                         description = offer.description, price = offer.price,
                                         dateDebut = offer.dateDebut, image = offer.image,
-                                        active = offer.active, ownerId = offer.ownerId
+                                        active = offer.active, ownerId = offer.ownerId,
+                                        enchere = offer.enchere
                                     )
                                 )
 

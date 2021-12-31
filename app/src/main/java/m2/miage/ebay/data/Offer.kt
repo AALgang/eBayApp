@@ -14,5 +14,6 @@ data class Offer (
     val dateDebut: String?,
     val image: String?,
     val active: Boolean?,
-    val ownerId: String?
+    val ownerId: String?,
+    val enchere: Bid?
 ): Parcelable

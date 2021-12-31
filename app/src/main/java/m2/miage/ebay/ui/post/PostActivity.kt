@@ -34,6 +34,12 @@ class PostActivity : AppCompatActivity() {
 
         binding.offer?.let {
             Glide.with(this).load(it.image!!).into(imgPost)
+            Toast.makeText(this, it.enchere.toString(), Toast.LENGTH_SHORT).show()
+            if (it.enchere != null) {
+                txt_price.text = it.enchere.prix.toString()
+            } else {
+                txt_price.text = it.price.toString()
+            }
         }
 
         btn_pay.isEnabled = isOfferActive(LocalDateTime.parse(binding.offer?.dateDebut.toString(), DateTimeFormatter.ISO_DATE_TIME))

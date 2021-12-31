@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -31,10 +32,9 @@ import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
-    private var _posts : MutableLiveData<Resource<List<Offer>>> = MutableLiveData()
     lateinit var offerAdapter: OfferRecyclerViewAdapter
 
-    var offersBid: MutableLiveData<Bid> = MutableLiveData()
+    var offerBid: MutableLiveData<Bid> = MutableLiveData()
     val db = Firebase.firestore
 
     override fun onCreateView(
@@ -44,10 +44,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initializeObservers()
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        getPosts()
         v_swipe.setOnRefreshListener(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getPosts()
     }
 
     private fun initializeAdapter(offers: List<Offer>) {
@@ -56,32 +62,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         rv_post.itemAnimator = DefaultItemAnimator()
         offerAdapter.context = this.requireContext()
         rv_post.adapter = offerAdapter
-    }
-
-    private fun initializeObservers() {
-
-        val list = mutableListOf<Offer>()
-
-        initializeAdapter(list)
-
-        getPosts()
-        _posts.observe(viewLifecycleOwner, {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    list.addAll(it.data!!)
-                    initializeAdapter(it.data)
-                }
-                Status.LOADING -> {
-                    Toast.makeText(context, "Chargement", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        initializeObservers()
     }
 
     private fun getPosts() {
@@ -98,26 +78,51 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 offers?.let {
                     for (offer in offers) {
 
-                            offerList.add(Offer(
-                                id = offer.id,
-                                name = offer.getString("nom").toString(),
-                                description = offer.getString("desc"),
-                                price = offer.getString("prixInitial"),
-                                dateDebut = offer.getString("dateDebut"),
-                                image = offer.getString("photo"),
-                                active = offer.getBoolean("active"),
-                                ownerId = offer.getString("proprietaire"),
-                            ))
+                        getBid(offer.reference.id)
+
+                        offerBid.observe(viewLifecycleOwner,  {
+                            offerList.add(
+                                Offer(
+                                    id = offer.id,
+                                    name = offer.getString("nom").toString(),
+                                    description = offer.getString("desc"),
+                                    price = offer.getString("prixInitial"),
+                                    dateDebut = offer.getString("dateDebut"),
+                                    image = offer.getString("photo"),
+                                    active = offer.getBoolean("active"),
+                                    ownerId = offer.getString("proprietaire"),
+                                    enchere = it
+                                )
+                            )
+                        })
+
                         }
                     }
 
-                    _posts.postValue(Resource.success(offerList))
+                    initializeAdapter(offerList)
              }
-        }
+    }
+
+    private fun getBid(docRef: String) {
+
+        db.collection("Offers")
+            .document(docRef)
+            .collection("bid")
+            .orderBy("prix", Query.Direction.DESCENDING).limit(1)
+            .get()
+            .addOnCompleteListener{ bids ->
+
+                    offerBid.postValue(Bid(bids.result?.documents?.get(0)?.getString("acheteur").toString(),
+                    bids.result?.documents?.get(0)?.getDate("date"),
+                    bids.result?.documents?.get(0)?.getString("prix")))
+                }
+
+
+    }
 
     override fun onRefresh() {
 
-        initializeObservers()
+        getPosts()
 
         Handler(Looper.getMainLooper()).run {
             v_swipe.isRefreshing = false
