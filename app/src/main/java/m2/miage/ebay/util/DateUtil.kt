@@ -18,7 +18,7 @@ class DateUtil {
 
             // Vérifie si l'enchère est démarrée et si les 5 min sont écoulées
             if (date.toEpochSecond(ZoneOffset.UTC) <= now.toEpochSecond(ZoneOffset.UTC)
-                && now.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC) + 300000000000000) {
+                && now.toEpochSecond(ZoneOffset.UTC) < date.toEpochSecond(ZoneOffset.UTC) + 3000000000000) {
                 response = true
             }
 

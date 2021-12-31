@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 class PostActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_post)
@@ -36,9 +37,9 @@ class PostActivity : AppCompatActivity() {
             Glide.with(this).load(it.image!!).into(imgPost)
             Toast.makeText(this, it.enchere.toString(), Toast.LENGTH_SHORT).show()
             if (it.enchere != null) {
-                txt_price.text = it.enchere.prix.toString()
+                txt_price.text = it.enchere.prix + " €"
             } else {
-                txt_price.text = it.price.toString()
+                txt_price.text = it.price + " €"
             }
         }
 
@@ -52,7 +53,7 @@ class PostActivity : AppCompatActivity() {
 
             if (!txt_price.text.isNullOrEmpty() && !txt_new_price.text.isNullOrEmpty()) {
 
-                val actualPrice: Double = txt_price.text.toString().toDouble()
+                val actualPrice: Double = txt_price.text.split(" ")[0].toDouble()
                 val newPrice: Double = txt_new_price.text.toString().toDouble()
 
                 if (actualPrice >= newPrice) {
@@ -67,7 +68,7 @@ class PostActivity : AppCompatActivity() {
                         FirebaseAuth.getInstance().currentUser?.let {
 
                             Firebase.firestore.collection("Offers").document(binding.offer?.id.toString()).collection("bid").add(
-                                Bid("", Calendar.getInstance().time, txt_new_price.text.toString())
+                                Bid(it.uid, Calendar.getInstance().time, txt_new_price.text.toString())
                             ).addOnSuccessListener {
                                         Toast.makeText(this, "Payé", Toast.LENGTH_LONG).show()
                                     }

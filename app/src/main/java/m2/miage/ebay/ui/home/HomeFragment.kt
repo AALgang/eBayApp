@@ -1,33 +1,24 @@
 package m2.miage.ebay.ui.home
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Query
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.fragment_home.*
 import m2.miage.ebay.R
 import m2.miage.ebay.data.Offer
-import m2.miage.ebay.util.Resource
-import m2.miage.ebay.util.Status
 import java.util.*
 import com.google.firebase.firestore.ktx.firestore
 import m2.miage.ebay.data.Bid
-import m2.miage.ebay.data.User
 import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -112,9 +103,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             .get()
             .addOnCompleteListener{ bids ->
 
-                    offerBid.postValue(Bid(bids.result?.documents?.get(0)?.getString("acheteur").toString(),
+                    offerBid.value = Bid(bids.result?.documents?.get(0)?.getString("acheteur").toString(),
                     bids.result?.documents?.get(0)?.getDate("date"),
-                    bids.result?.documents?.get(0)?.getString("prix")))
+                    bids.result?.documents?.get(0)?.getString("prix"))
                 }
 
 
