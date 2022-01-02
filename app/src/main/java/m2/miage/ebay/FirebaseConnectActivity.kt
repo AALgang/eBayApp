@@ -5,8 +5,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -14,7 +12,6 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlin.math.log
 
 class FirebaseConnectActivity : AppCompatActivity() {
 
@@ -62,7 +59,7 @@ class FirebaseConnectActivity : AppCompatActivity() {
     // [START auth_fui_result]
     private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
-        Log.i("Response onSIgn", result.idpResponse.toString())
+
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
             val user = FirebaseAuth.getInstance().currentUser
@@ -80,14 +77,15 @@ class FirebaseConnectActivity : AppCompatActivity() {
             startActivity(Intent(this, StartActivity::class.java))
             this.finish()
         } else {
+
         }
     }
 
-    private fun addUser(mail:String, name:String, pseudo:String){
+    private fun addUser(mail:String, name:String, uid:String){
         var exist: Boolean = false
         // Access a Cloud Firestore instance from your Activity
         val db = Firebase.firestore
-        Log.i("TEST", "addUser : $mail")
+
         db.collection("users").whereEqualTo("mail", mail)
             .get().addOnSuccessListener { documents ->
                 exist = !documents.isEmpty
@@ -97,21 +95,16 @@ class FirebaseConnectActivity : AppCompatActivity() {
                     val user = hashMapOf(
                         "mail" to mail,
                         "name" to name,
-                        "pseudo" to pseudo
+                        "pseudo" to uid
                     )
 
                     // Add a new document with a generated ID
-                    db.collection("users")
-                        .add(user)
-                        .addOnSuccessListener { documentReference ->
-                            Log.d("Add", "DocumentSnapshot added with ID: ${documentReference.id}")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("Add", "Error adding document", e)
-                        }
+                    db.collection("users").document(uid)
+                        .set(user)
+                        .addOnSuccessListener { Log.d("FBA", "DocumentSnapshot successfully written!") }
+                        .addOnFailureListener { e -> Log.w("FBA", "Error writing document", e) }
                 }
             }
-
     }
 
     private fun delete() {

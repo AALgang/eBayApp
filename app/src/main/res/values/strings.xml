@@ -4,6 +4,9 @@
     <string name="title_publish">Publier</string>
     <string name="title_profile">Profil</string>
     <string name="deconnexion">Déconnexion</string>
+    <string name="definirLocalisation">Définir sa localisation de résidence</string>
+    <string name="changer_l_avatar">Changer l\'avatar</string>
+    <string name="modifier_le_pseudo">Modifier le pseudo</string>
 
     <string name="title_start"></string>
     <string name="title_searchbar">Rechercher une activité</string>
