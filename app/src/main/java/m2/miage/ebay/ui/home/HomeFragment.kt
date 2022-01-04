@@ -3,6 +3,7 @@ package m2.miage.ebay.ui.home
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -67,11 +68,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
 
                 offers?.let {
+
                     for (offer in offers) {
 
                         getBid(offer.reference.id)
 
-                        offerBid.observe(viewLifecycleOwner,  {
+                        offerBid.observe(viewLifecycleOwner, {
                             offerList.add(
                                 Offer(
                                     id = offer.id,
@@ -86,10 +88,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                 )
                             )
                         })
-
-                        }
                     }
 
+                }
                     initializeAdapter(offerList)
              }
     }
@@ -103,11 +104,21 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             .get()
             .addOnCompleteListener{ bids ->
 
-                    offerBid.value = Bid(bids.result?.documents?.get(0)?.getString("acheteur").toString(),
-                    bids.result?.documents?.get(0)?.getDate("date"),
-                    bids.result?.documents?.get(0)?.getString("prix"))
-                }
+                bids.result?.let {
 
+                    it.documents.let {
+
+                        if (it.size > 0) {
+                            offerBid.value = Bid(it.get(0).getString("acheteur").toString(),
+                                            it.get(0).getDate("date"),
+                                            it.get(0).getString("prix"))
+                        } else {
+                            offerBid.value = null
+                        }
+                    }
+
+                }
+            }
 
     }
 

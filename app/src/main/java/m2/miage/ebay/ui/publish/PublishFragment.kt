@@ -44,10 +44,6 @@ class PublishFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_publish, container, false)
     }
 
-    //TODO : vérifier que la date entrée est bien supèrieure a la date du jour
-    //TODO : faire la page plus bg sinon alexis taper moi
-    //TODO : faire une classe générique pour l'ajout d'image dans la base
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -81,7 +77,7 @@ class PublishFragment : Fragment() {
                     "desc" to tb_description.text.toString(),
                     "nom" to tb_Name.text.toString(),
                     "photo" to image_url,
-                    "prixInitial" to tb_prix.text.toString().toInt(),
+                    "prixInitial" to tb_prix.text.toString(),
                     "proprietaire" to FirebaseAuth.getInstance().currentUser?.uid
                 )
                 //Toast.makeText(context, Annonce.toString(),Toast.LENGTH_LONG).show()

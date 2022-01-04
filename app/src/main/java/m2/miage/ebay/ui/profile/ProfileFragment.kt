@@ -140,7 +140,10 @@ class ProfileFragment : Fragment() {
             FirebaseAuth.getInstance().currentUser?.let {
                 Firebase.firestore.collection("users").document(it.uid)
                     .update("avatar_uri", image_uri)
-                    .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                    .addOnSuccessListener {
+                        Log.d("FB", "DocumentSnapshot successfully updated!")
+                        Toast.makeText(context, "L'avatar a bien été mis à jour", Toast.LENGTH_SHORT).show()
+                    }
                     .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
             }
         }
@@ -217,7 +220,10 @@ class ProfileFragment : Fragment() {
                         var coordonnees = location.latitude.toString() + "," + location.longitude.toString()
                         Firebase.firestore.collection("users").document(it.uid)
                             .update("location", coordonnees)
-                            .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                            .addOnSuccessListener {
+                                Log.d("FB", "DocumentSnapshot successfully updated!")
+                                Toast.makeText(context, "La localisation a bien été mise à jour", Toast.LENGTH_SHORT).show()
+                            }
                             .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
                     }
                 }

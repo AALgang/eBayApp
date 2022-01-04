@@ -35,7 +35,6 @@ class PostActivity : AppCompatActivity() {
 
         binding.offer?.let {
             Glide.with(this).load(it.image!!).into(imgPost)
-            Toast.makeText(this, it.enchere.toString(), Toast.LENGTH_SHORT).show()
             if (it.enchere != null) {
                 txt_price.text = it.enchere.prix + " €"
             } else {
@@ -66,6 +65,8 @@ class PostActivity : AppCompatActivity() {
 
                         // Add a new document with a generated ID
                         FirebaseAuth.getInstance().currentUser?.let {
+
+                            Toast.makeText(this, binding.offer?.id.toString(), Toast.LENGTH_SHORT).show()
 
                             Firebase.firestore.collection("Offers").document(binding.offer?.id.toString()).collection("bid").add(
                                 Bid(it.uid, Calendar.getInstance().time, txt_new_price.text.toString())

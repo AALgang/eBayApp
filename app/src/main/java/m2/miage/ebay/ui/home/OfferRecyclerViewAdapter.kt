@@ -61,10 +61,8 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
                     val context = v?.context as AppCompatActivity
 
                     FirebaseAuth.getInstance().currentUser?.let {
-                        var bid = Firebase.firestore.collection("Offers").document(offer.id)
+                       Firebase.firestore.collection("Offers").document(offer.id)
                             .collection("bid").orderBy("date").get().addOnSuccessListener {
-
-                                Toast.makeText(context, it.documents.get(0).toString(), Toast.LENGTH_SHORT).show()
 
                                 val intent = Intent(context, PostActivity::class.java)
                                 intent.putExtra(
@@ -94,21 +92,6 @@ class OfferRecyclerViewAdapter(listOffer: List<Offer>) : RecyclerView.Adapter<Of
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View = LayoutInflater.from(parent.context).inflate(R.layout.offer_item_activity, parent, false)
         return ViewHolder(view)
-    }
-
-    private fun getUser(userRef: String) {
-
-        val db = Firebase.firestore
-        db.collection("users").document(userRef).addSnapshotListener { user, error ->
-
-            user?.let {
-                userReference.value = User(user.getString("avatar_uri"),
-                    user.getString("location"),
-                    user.getString("mail").toString(),
-                    user.getString("name").toString(),
-                    user.getString("psuedo").toString())
-            }
-        }
     }
 
     class ViewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
