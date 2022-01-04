@@ -97,8 +97,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun getBid(docRef: String) {
 
-        db.collection("Offers")
-            .document(docRef)
+        db.collection("Offers").document(docRef)
             .collection("bid")
             .orderBy("prix", Query.Direction.DESCENDING).limit(1)
             .get()
@@ -108,7 +107,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                     it.documents.let {
 
-                        if (it.size > 0) {
+                        if (!it.isEmpty()) {
                             offerBid.value = Bid(it.get(0).getString("acheteur").toString(),
                                             it.get(0).getDate("date"),
                                             it.get(0).getString("prix"))

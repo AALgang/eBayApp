@@ -49,7 +49,6 @@ class PublishFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         bt_annuler.setOnClickListener{ View ->
-            //Toast.makeText(context, "bouton annuler cliqué ", Toast.LENGTH_SHORT).show()
             clearAll()
         }
 
@@ -62,14 +61,6 @@ class PublishFragment : Fragment() {
                 val time = substring(LocalTime.now().toString(),0,8)
                 val dateFormate = an+"-"+mois+"-"+jour+"T"+time
 
-               /*
-               val dateFormate = LocalDate.of(an.toInt(),mois.toInt(),jour.toInt(),hour.toInt(),minute.toInt())
-               val currentDateTime = LocalDateTime.now()
-                val compare = compareToDay(dateFormate,currentDateTime)
-
-                Toast.makeText(context,compare.toString(),Toast.LENGTH_LONG)*/
-                //teste si la date est au bon format
-
                 //Create a new offer with datas
                 val Annonce = hashMapOf(
                     "active" to true,
@@ -80,19 +71,16 @@ class PublishFragment : Fragment() {
                     "prixInitial" to tb_prix.text.toString(),
                     "proprietaire" to FirebaseAuth.getInstance().currentUser?.uid
                 )
-                //Toast.makeText(context, Annonce.toString(),Toast.LENGTH_LONG).show()
-                Log.d("TEST", Annonce.toString())
 
                 //Add a new document with a generated ID
                 db.collection("Offers")
                     .add(Annonce)
                     .addOnSuccessListener { documentReference ->
                         Toast.makeText(context, "INSERTION EFFECTUEE", Toast.LENGTH_SHORT).show()
-                        Log.d("TEST", "DocumentSnapshot added with ID: ${documentReference.id}")
+                        //Log.d("TEST", "DocumentSnapshot added with ID: ${documentReference.id}")
                         clearAll()
                     }
                     .addOnFailureListener { e ->
-                        //Toast.makeText(context, "Error adding document", Toast.LENGTH_SHORT).show()
                         Toast.makeText(context, "ERREUR D'INSERTION", Toast.LENGTH_SHORT).show()
                         Log.w("TEST", "Error adding document", e)
                     }
