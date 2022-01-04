@@ -3,7 +3,6 @@ package m2.miage.ebay.ui.profile
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,9 +15,6 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_profile.*
 import m2.miage.ebay.FirebaseConnectActivity
 import m2.miage.ebay.R
-import android.location.LocationListener
-import android.location.LocationManager
-import android.net.Uri
 import android.os.Build
 import android.text.InputType
 import android.util.Log
@@ -47,30 +43,38 @@ class ProfileFragment : Fragment() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-        val locationPermissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            when {
-                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    // Precise location access granted.
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+            val locationPermissionRequest = registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { permissions ->
+                when {
+                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                        // Precise location access granted.
+                    }
+                    permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                        // Only approximate location access granted.
+                    }
+                    else -> {
+                        // No location access granted.
+                    }
                 }
-                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    // Only approximate location access granted.
-                } else -> {
-                // No location access granted.
             }
-            }
-        }
-        reload()
-        locationPermissionRequest.launch(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION))
+            reload()
+            locationPermissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
 
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
@@ -80,7 +84,6 @@ class ProfileFragment : Fragment() {
             Firebase.firestore.collection("users").document(it).get()
                 .addOnSuccessListener { document ->
                     if (document != null) {
-                        txb_localisation.text = document.data?.get("location").toString()
                         if(document.data?.get("avatar_uri") != null && (document.data?.get("avatar_uri") as String).isNotEmpty()) {
                             Picasso.get().load(document.data!!["avatar_uri"] as String)
                                 .placeholder(R.drawable.ic_person)
@@ -89,8 +92,6 @@ class ProfileFragment : Fragment() {
                         } else {
                             avatar.setImageResource(R.drawable.my_great_logo)
                         }
-                    } else {
-                        txb_localisation.text = "Pas de localisation définie"
                     }
                 }
         }
@@ -139,7 +140,10 @@ class ProfileFragment : Fragment() {
             FirebaseAuth.getInstance().currentUser?.let {
                 Firebase.firestore.collection("users").document(it.uid)
                     .update("avatar_uri", image_uri)
-                    .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                    .addOnSuccessListener {
+                        Log.d("FB", "DocumentSnapshot successfully updated!")
+                        Toast.makeText(context, "L'avatar a bien été mis à jour", Toast.LENGTH_SHORT).show()
+                    }
                     .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
             }
         }
@@ -206,13 +210,6 @@ class ProfileFragment : Fragment() {
                 )
             } != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             Toast.makeText(requireContext(), "Vous devez autoriser l'accés a la position", Toast.LENGTH_LONG)
         }
         fusedLocationClient.lastLocation
@@ -223,7 +220,10 @@ class ProfileFragment : Fragment() {
                         var coordonnees = location.latitude.toString() + "," + location.longitude.toString()
                         Firebase.firestore.collection("users").document(it.uid)
                             .update("location", coordonnees)
-                            .addOnSuccessListener { Log.d("FB", "DocumentSnapshot successfully updated!") }
+                            .addOnSuccessListener {
+                                Log.d("FB", "DocumentSnapshot successfully updated!")
+                                Toast.makeText(context, "La localisation a bien été mise à jour", Toast.LENGTH_SHORT).show()
+                            }
                             .addOnFailureListener { e -> Log.w("FB", "Error updating document", e) }
                     }
                 }

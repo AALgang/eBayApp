@@ -8,4 +8,11 @@
     <string name="changer_l_avatar">Changer l\'avatar</string>
     <string name="modifier_le_pseudo">Modifier le pseudo</string>
 
+    <string name="title_start"></string>
+    <string name="title_searchbar">Rechercher une activité</string>
+
+    <string name="chip_available">dispo</string>
+    <string name="chip_not_available">non dispo</string>
+
+    <string name="txt_devise">%s €</string>
 </resources>
